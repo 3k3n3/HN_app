@@ -1,0 +1,67 @@
+{% extends 'app/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<main class="container">
+    <div class="card">
+        <div class="card-header">
+            <h5>{{post.title}}</h5>
+        </div>
+
+        <div class="card-body">
+            <p class="text-muted">
+                Posted by {{post.by}} on {{post.time}}
+            </p>
+            <p class="card-text">
+                {% if post.text %}
+                {{post.text|safe}}
+                {% endif %}
+            </p>
+
+            {% if post.url %}
+            <p>
+                <a href="{{post.url}}"> Read here... </a> <br>
+            </p>
+            {% endif %}
+        </div>
+        <hr>
+
+        <div class="container">
+            <div class="text-muted">
+                Comments:
+            </div>
+            <hr>
+
+            {% for comment in comment %}
+
+            {{comment.by}} [{{comment.time}}]: {{comment | safe}}
+
+            <hr>
+
+            <div class="container">
+                {% for subcomment in sub_comment %}
+                {% if comment.comment_id == subcomment.parent %}
+                <div class="d-flex">
+                    <div class="mx-2">
+                        &#8627;
+                    </div>
+                    <div>
+                        {{subcomment.by}} [{{subcomment.time}}]: {{subcomment | safe}}
+                    </div>
+                </div>
+                <hr>
+                {% endif %}
+                {% endfor %}
+            </div>
+
+            {% empty %}
+            <div class="text-muted">
+                No comments yet.
+            </div>
+            {% endfor %}
+        </div>
+        <br>
+    </div>
+</main>
+{% endblock %}

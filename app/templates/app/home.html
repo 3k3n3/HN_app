@@ -1,0 +1,97 @@
+{% extends 'app/base.html' %}
+{% load static %}
+
+{% block content %}
+<main class="container">
+    <div class="d-flex justify-content-between">
+        <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                aria-expanded="false">
+                Categories
+            </button>
+            <ul class="dropdown-menu">
+                <li>
+                    <a class="dropdown-item" href="{% url 'new' %}">New</a>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="{% url 'askhn' %}">Ask HN</a>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="{% url 'showhn' %}">Show HN</a>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="{% url 'jobshn' %}">Jobs</a>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="{% url 'pollshn' %}">Polls</a>
+                </li>
+            </ul>
+        </div>
+        <div>
+            <form action="" method="get">
+                {{type_filter.form}}
+                <button class="btn btn-secondary" type="submit">Search</button>
+            </form>
+        </div>
+    </div>
+    <br>
+    <br>
+
+    <div>
+        {% for post in page_obj %}
+        <div class="card d-flex">
+            <div class="card-header">
+                <h5>
+                    {{page_obj.start_index|add:forloop.counter0}}.
+                    {{post.title}}
+                    [{{post.post_type | title}}]
+                </h5>
+            </div>
+
+            <div class="card-body">
+                Posted by {{post.by}} on {{post.time}}
+
+                {% if post.url %}
+                <a class="btn btn-info" href="{{post.url}}"> Read Story </a> <br>
+                <a class="btn btn-primary" href="{% url 'post' post.post_id %}">More...</a>
+                {% else %}
+                <a class="btn btn-primary" href="{% url 'post' post.post_id %}">More...</a>
+                {% endif %}
+            </div>
+        </div>
+        <br>
+        {% empty %}
+
+        No posts.
+
+        {% endfor %}
+    </div>
+</main>
+
+<footer>
+    <div class="pagination justify-content-center mb-4">
+        {% if page_obj.has_previous %}
+        <li>
+            <a class="page-link" href="?page=1">&laquo; First</a>
+        </li>
+        <li>
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+        </li>
+        {% endif %}
+
+        <div class="page-link">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        </div>
+
+        {% if page_obj.has_next %}
+        <li>
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+        </li>
+        <li>
+            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
+        </li>
+        {% endif %}
+    </div>
+
+</footer>
+{% endblock %}
