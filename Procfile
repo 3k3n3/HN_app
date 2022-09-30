@@ -1,1 +1,1 @@
-web: gunicorn qcproject.wsgi
+web: gunicorn qcproject.wsgi && python manage.py migrate
