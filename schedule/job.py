@@ -32,16 +32,16 @@ def schedule_job():
         
         # send comments to comments model
         elif i_data['type'] == 'comment': 
-            # pass
-            new_data = Comment(
-                comment_id = i_data['id'],
-                by = i_data['by'],
-                text = i_data['text'],
-                time = i_data['time'],
-                comment_type = i_data['type'],
-                parent=i_data['parent']
-            )
-            new_data.save()
+            pass
+            # new_data = Comment(
+            #     comment_id = i_data['id'],
+            #     by = i_data['by'],
+            #     text = i_data['text'],
+            #     time = i_data['time'],
+            #     comment_type = i_data['type'],
+            #     parent=i_data['parent']
+            # )
+            # new_data.save()
         
             '''
             Check if story type is Ask HN or Show HN first because they have some 
@@ -49,7 +49,12 @@ def schedule_job():
             Increment counter by one at each instance an item is saved to Base model.
             '''
 
-        elif ('Ask HN' in i_data['title']) and ('url' not in i_data):
+        elif 'Ask HN' or 'Tell HN' in i_data['title']:#and 'url' not in i_data:
+            print(i_data['title'])
+
+            '''
+        elif 'Ask HN' in i_data['title'] and 'url' not in i_data:
+
             # print (counter, i_data)
             new_data = Base(
                 post_id = i_data['id'],
@@ -60,8 +65,8 @@ def schedule_job():
                 title = i_data['title'],
                 post_type = 'Ask HN',
             )
-            new_data.save()
-            counter += 1
+            # new_data.save()
+            # counter += 1
 
         elif 'Ask HN' in i_data['title'] and 'url' in i_data:
             # print (counter, i_data['title'])
@@ -74,8 +79,8 @@ def schedule_job():
                 post_type = 'Ask HN',
                 url = i_data['url'],
             )
-            new_data.save()
-            counter += 1
+            # new_data.save()
+            # counter += 1
 
         elif 'Show HN' in i_data['title']:
             # print (counter, i_data['title'])
@@ -88,11 +93,11 @@ def schedule_job():
                 post_type = 'Show HN',
                 url = i_data['url'],
             )
-            new_data.save()
-            counter += 1
+            # new_data.save()
+            # counter += 1
 
-        elif (i_data['type'] == 'story') and ('url' not in i_data):
-            # print (counter, i_data['title'])
+        elif i_data['type'] == 'story' and 'url' not in i_data:
+            print (counter, i_data['title'], '@@@@@@')
             new_data = Base(
                 post_id = i_data['id'],
                 by = i_data['by'],
@@ -102,12 +107,12 @@ def schedule_job():
                 title = i_data['title'],
                 post_type = i_data['type'],
             )
-            new_data.save()
-            counter += 1
+            # new_data.save()
+            # counter += 1
 
 
         elif i_data['type'] == 'story' and 'url' in i_data:
-            # print (counter, i_data['title'])
+            print (counter, i_data['title'], '%$$%$')
             new_data = Base(
                 post_id = i_data['id'],
                 by = i_data['by'],
@@ -117,11 +122,11 @@ def schedule_job():
                 post_type = i_data['type'],
                 url = i_data['url'],
             )
-            new_data.save()
-            counter += 1
+            # new_data.save()
+            # counter += 1
 
         elif i_data['type'] == 'job' and 'url' not in i_data:
-            # print (counter, i_data['title'])
+            print (counter, i_data['title'])
             new_data = Base(
                 post_id = i_data['id'],
                 by = i_data['by'],
@@ -136,7 +141,7 @@ def schedule_job():
 
 
         elif i_data['type'] == 'job' and 'url' in i_data:
-            # print (counter, i_data['title'])
+            print (counter, i_data['title'])
             new_data = Base(
                 post_id = i_data['id'],
                 by = i_data['by'],
@@ -164,10 +169,12 @@ def schedule_job():
             new_data.save()
             counter += 1
 
+
+            '''
         # if for there is a post type not recognized output to terminal
         else: print(f'Post type {i_data["type"]} not recognized at {counter}')
 
         # decrease maxitem id by one on each iteration
         data -= 1
-        if counter == 101:
+        if counter == 11:
             break

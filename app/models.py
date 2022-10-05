@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.urls import reverse
 # Create your models here.
 
 
@@ -18,6 +18,9 @@ class Base(models.Model):
     def __str__(self):
         return f'{self.title} ({self.post_type})'
 
+    def get_absolute_url(self):
+        return reverse('post', args=[str(self.post_id)])
+
 class Comment(models.Model):
     comment_id = models.IntegerField(primary_key=True, unique=True)
     parent = models.IntegerField()
@@ -27,4 +30,4 @@ class Comment(models.Model):
     comment_type = models.CharField(max_length=50)
 
     def __str__(self):
-        return (self.text)
+        return (self.text[:50])
