@@ -6,7 +6,163 @@ from .filters import BaseFilter
 import json
 import requests
 
+
+from django.utils import timezone
+import datetime
+
 def home(request):
+##################
+# from HN Api
+    url = 'https://hacker-news.firebaseio.com/v0/maxitem.json?print=pretty'
+    payload = "{}"
+    response = requests.request("GET", url, data=payload)
+
+    # data is maxitem Id, integer value
+    data = response.json()
+
+    pid = []
+    counter = 1
+
+    for i in range(data+1):
+        i_url = "https://hacker-news.firebaseio.com/v0/item/%d.json" %(data)
+        response = requests.get(i_url)
+        i_data = response.json()
+
+        time = i_data['time']
+        for t in i_data:
+            i_data['time'] = datetime.datetime.now(tz=timezone.utc)
+    
+
+        if 'dead' in i_data or 'deleted' in i_data:
+            pass
+
+        elif i_data['type'] == 'comment':
+            pass
+            # print(counter,':',i_url[35:],i_data['type'])
+            # new_data = Comment(
+            #     comment_id = i_data['id'],
+            #     by = i_data['by'],
+            #     text = i_data['text'],
+            #     time = i_data['time'],
+            #     comment_type = i_data['type'],
+            #     parent=i_data['parent']
+            # )
+            # new_data.save()
+            # if 'kids' in i_data:
+            #     for data in i_data['kids']:
+            #         i_url = "https://hacker-news.firebaseio.com/v0/item/%d.json" %(data)
+            #         print(i_url, 'kid')
+            # else: print('NO URL kid')
+
+
+        elif 'Ask HN' in i_data['title'] or 'Tell HN' in i_data['title']:
+            pid.append(i_data['id'])
+            new_data = Base(
+                post_id = i_data['id'],
+                by = i_data['by'],
+                score = i_data['score'],
+                text = i_data['text'],
+                time = i_data['time'],
+                title = i_data['title'],
+                post_type = 'Ask HN',
+            )
+            # new_data.save()
+            print(counter,':',i_url[35:],'Ask HN')
+            counter += 1
+
+
+            # if 'kids' in i_data:
+            #     for data in i_data['kids']:
+            #         i_url = "https://hacker-news.firebaseio.com/v0/item/%d.json" %(data)
+            #         print(i_url)
+            # else: print('Ask HN, no kids')
+
+        elif 'Show HN' in i_data['title']:
+            pid.append(i_data['id'])
+            
+            new_data = Base(
+                post_id = i_data['id'],
+                by = i_data['by'],
+                score = i_data['score'],
+                url = i_data['url'],
+                time = i_data['time'],
+                title = i_data['title'],
+                post_type = 'Show HN',
+            )
+            # new_data.save()
+            print(counter,':',i_url[35:],'Show HN')
+            counter += 1
+
+            # pid.append(i_data['id'])
+            # print(counter,':',i_url[35:],'Show HN')
+            # if 'kids' in i_data:
+            #     for i in i_data['kids']:
+            #         i_url = "https://hacker-news.firebaseio.com/v0/item/%d.json" %(i)
+            #         print(i_url)
+            #     # print(i_data['kids'])
+            # else: print('f them kids')
+            # counter += 1
+
+        elif i_data['type'] == 'job':
+            pid.append(i_data['id'])
+
+            new_data = Base(
+                post_id = i_data['id'],
+                by = i_data['by'],
+                score = i_data['score'],
+                text = i_data['text'],
+                time = i_data['time'],
+                title = i_data['title'],
+                post_type = i_data['type'],
+            )
+            # new_data.save()
+            print(counter,':',i_url[35:],'Job')
+            counter += 1
+
+            # print(counter,':',i_url[35:],i_data['type'])
+            # if 'kids' in i_data:
+            #     for i in i_data['kids']:
+            #         i_url = "https://hacker-news.firebaseio.com/v0/item/%d.json" %(i)
+            #         print(i_url)
+            #     # print(i_data['kids'])
+            # else: print('f them kids')
+            # counter += 1
+
+        elif i_data['type'] == 'story':
+            pid.append(i_data['id'])
+
+            new_data = Base(
+                post_id = i_data['id'],
+                by = i_data['by'],
+                score = i_data['score'],
+                url = i_data['url'],
+                time = i_data['time'],
+                title = i_data['title'],
+                post_type = i_data['type'],
+            )
+            # new_data.save()
+            print(counter,':',i_url[35:],'Story')
+            counter += 1
+
+            # print(counter,':',i_url[35:],i_data['type'])
+            # if 'kids' in i_data:
+            #     for i in i_data['kids']:
+            #         i_url = "https://hacker-news.firebaseio.com/v0/item/%d.json" %(i)
+            #         print(i_url)
+            #     # print(i_data['kids'], i_data['descendants'])
+            # else: print('f them kids', i_data['descendants'])
+            # counter += 1
+
+        else:
+            print(counter,':',i_url[35:],i_data['type'], '*UNIQUE*')
+            # counter += 1
+
+        data -= 1
+        if counter == 11:
+            break
+    print(pid)
+    
+########################
     # fiter based on score(top stories have higher score)
     posts = Base.objects.all().order_by("-score")
 

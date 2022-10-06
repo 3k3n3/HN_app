@@ -48,9 +48,77 @@ def schedule_job():
             unique fields from regular HN stories, then save them as their own type.
             Increment counter by one at each instance an item is saved to Base model.
             '''
+        elif 'Ask HN' in i_data['title'] or 'Tell HN' in i_data['title']:
+            pid.append(i_data['id'])
+            new_data = Base(
+                post_id = i_data['id'],
+                by = i_data['by'],
+                score = i_data['score'],
+                text = i_data['text'],
+                time = i_data['time'],
+                title = i_data['title'],
+                post_type = 'Ask HN',
+            )
+            new_data.save()
+            print(counter,':',i_url[35:],'Ask HN')
+            counter += 1
 
-        elif 'Ask HN' or 'Tell HN' in i_data['title']:#and 'url' not in i_data:
-            print(i_data['title'])
+        elif 'Show HN' in i_data['title']:
+            pid.append(i_data['id'])
+            
+            new_data = Base(
+                post_id = i_data['id'],
+                by = i_data['by'],
+                score = i_data['score'],
+                url = i_data['url'],
+                time = i_data['time'],
+                title = i_data['title'],
+                post_type = 'Show HN',
+            )
+            new_data.save()
+            print(counter,':',i_url[35:],'Show HN')
+            counter += 1
+
+        elif i_data['type'] == 'job':
+            pid.append(i_data['id'])
+
+            new_data = Base(
+                post_id = i_data['id'],
+                by = i_data['by'],
+                score = i_data['score'],
+                text = i_data['text'],
+                time = i_data['time'],
+                title = i_data['title'],
+                post_type = i_data['type'],
+            )
+            new_data.save()
+            print(counter,':',i_url[35:],'Job')
+            counter += 1
+
+        elif i_data['type'] == 'story':
+            pid.append(i_data['id'])
+
+            new_data = Base(
+                post_id = i_data['id'],
+                by = i_data['by'],
+                score = i_data['score'],
+                url = i_data['url'],
+                time = i_data['time'],
+                title = i_data['title'],
+                post_type = i_data['type'],
+            )
+            new_data.save()
+            print(counter,':',i_url[35:],'Story')
+            counter += 1
+
+
+        # if for there is a post type not recognized output to terminal
+        else: print(f'Post type {i_data["type"]} not recognized at {counter}')
+
+        # decrease maxitem id by one on each iteration
+        data -= 1
+        if counter == 11:
+            break
 
             '''
         elif 'Ask HN' in i_data['title'] and 'url' not in i_data:
@@ -171,10 +239,4 @@ def schedule_job():
 
 
             '''
-        # if for there is a post type not recognized output to terminal
-        else: print(f'Post type {i_data["type"]} not recognized at {counter}')
 
-        # decrease maxitem id by one on each iteration
-        data -= 1
-        if counter == 11:
-            break
