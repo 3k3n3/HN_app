@@ -12,6 +12,7 @@ import datetime
 
 def home(request):
 ##################
+    '''
 # from HN Api
     url = 'https://hacker-news.firebaseio.com/v0/maxitem.json?print=pretty'
     payload = "{}"
@@ -161,7 +162,7 @@ def home(request):
         if counter == 11:
             break
     print(pid)
-    
+    '''
 ########################
     # fiter based on score(top stories have higher score)
     posts = Base.objects.all().order_by("-score")
