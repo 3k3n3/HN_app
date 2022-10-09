@@ -14,7 +14,10 @@ def schedule_job():
     # data is maxitem Id, integer value
     data = response.json()
 
+    global pid, counter, i_data
+    pid = []
     counter = 1
+
 
     for i in range(data+1):
         i_url = "https://hacker-news.firebaseio.com/v0/item/%d.json" %(data)
@@ -49,66 +52,23 @@ def schedule_job():
             Increment counter by one at each instance an item is saved to Base model.
             '''
         elif 'Ask HN' in i_data['title'] or 'Tell HN' in i_data['title']:
-            pid.append(i_data['id'])
-            new_data = Base(
-                post_id = i_data['id'],
-                by = i_data['by'],
-                score = i_data['score'],
-                text = i_data['text'],
-                time = i_data['time'],
-                title = i_data['title'],
-                post_type = 'Ask HN',
-            )
-            new_data.save()
-            print(counter,':',i_url[35:],'Ask HN')
+            update_db()
+            # print(counter,':',i_url[35:],'Ask HN')
             counter += 1
 
         elif 'Show HN' in i_data['title']:
-            pid.append(i_data['id'])
-            
-            new_data = Base(
-                post_id = i_data['id'],
-                by = i_data['by'],
-                score = i_data['score'],
-                url = i_data['url'],
-                time = i_data['time'],
-                title = i_data['title'],
-                post_type = 'Show HN',
-            )
-            new_data.save()
-            print(counter,':',i_url[35:],'Show HN')
+            update_db()
+            # print(counter,':',i_url[35:],'Show HN')
             counter += 1
 
         elif i_data['type'] == 'job':
-            pid.append(i_data['id'])
-
-            new_data = Base(
-                post_id = i_data['id'],
-                by = i_data['by'],
-                score = i_data['score'],
-                text = i_data['text'],
-                time = i_data['time'],
-                title = i_data['title'],
-                post_type = i_data['type'],
-            )
-            new_data.save()
-            print(counter,':',i_url[35:],'Job')
+            update_db()
+            # print(counter,':',i_url[35:],'Job')
             counter += 1
 
         elif i_data['type'] == 'story':
-            pid.append(i_data['id'])
-
-            new_data = Base(
-                post_id = i_data['id'],
-                by = i_data['by'],
-                score = i_data['score'],
-                url = i_data['url'],
-                time = i_data['time'],
-                title = i_data['title'],
-                post_type = i_data['type'],
-            )
-            new_data.save()
-            print(counter,':',i_url[35:],'Story')
+            update_db()
+            # print(counter,':',i_url[35:],'Story')
             counter += 1
 
 
@@ -120,123 +80,48 @@ def schedule_job():
         if counter == 11:
             break
 
-            '''
-        elif 'Ask HN' in i_data['title'] and 'url' not in i_data:
+# functions to save data to db
+def update_db():
+    pid.append(i_data['id'])
+    if 'url' in i_data:
+        has_url()
+    elif 'text' in i_data:
+        has_text()
+    else:
+        no_text_url()
 
-            # print (counter, i_data)
-            new_data = Base(
-                post_id = i_data['id'],
-                by = i_data['by'],
-                score = i_data['score'],
-                text = i_data['text'],
-                time = i_data['time'],
-                title = i_data['title'],
-                post_type = 'Ask HN',
-            )
-            # new_data.save()
-            # counter += 1
+def has_url():
+    new_data = Base(
+        post_id = i_data['id'],
+        by = i_data['by'],
+        score = i_data['score'],
+        url = i_data['url'],
+        time = i_data['time'],
+        title = i_data['title'],
+        post_type = i_data['type'],
+        # post_type = 'Show HN', # to specify cetain story types for example, 
+    )
+    new_data.save()
 
-        elif 'Ask HN' in i_data['title'] and 'url' in i_data:
-            # print (counter, i_data['title'])
-            new_data = Base(
-                post_id = i_data['id'],
-                by = i_data['by'],
-                score = i_data['score'],
-                time = i_data['time'],
-                title = i_data['title'],
-                post_type = 'Ask HN',
-                url = i_data['url'],
-            )
-            # new_data.save()
-            # counter += 1
+def has_text():
+    new_data = Base(
+        post_id = i_data['id'],
+        by = i_data['by'],
+        score = i_data['score'],
+        text = i_data['text'],
+        time = i_data['time'],
+        title = i_data['title'],
+        post_type = i_data['type'],
+    )
+    new_data.save()
 
-        elif 'Show HN' in i_data['title']:
-            # print (counter, i_data['title'])
-            new_data = Base (
-                post_id = i_data['id'],
-                by = i_data['by'],
-                score = i_data['score'],
-                time = i_data['time'],
-                title = i_data['title'],
-                post_type = 'Show HN',
-                url = i_data['url'],
-            )
-            # new_data.save()
-            # counter += 1
-
-        elif i_data['type'] == 'story' and 'url' not in i_data:
-            print (counter, i_data['title'], '@@@@@@')
-            new_data = Base(
-                post_id = i_data['id'],
-                by = i_data['by'],
-                score = i_data['score'],
-                text = i_data['text'],
-                time = i_data['time'],
-                title = i_data['title'],
-                post_type = i_data['type'],
-            )
-            # new_data.save()
-            # counter += 1
-
-
-        elif i_data['type'] == 'story' and 'url' in i_data:
-            print (counter, i_data['title'], '%$$%$')
-            new_data = Base(
-                post_id = i_data['id'],
-                by = i_data['by'],
-                score = i_data['score'],
-                time = i_data['time'],
-                title = i_data['title'],
-                post_type = i_data['type'],
-                url = i_data['url'],
-            )
-            # new_data.save()
-            # counter += 1
-
-        elif i_data['type'] == 'job' and 'url' not in i_data:
-            print (counter, i_data['title'])
-            new_data = Base(
-                post_id = i_data['id'],
-                by = i_data['by'],
-                score = i_data['score'],
-                text = i_data['text'],
-                time = i_data['time'],
-                title = i_data['title'],
-                post_type = i_data['type'],
-            )
-            new_data.save()
-            counter += 1
-
-
-        elif i_data['type'] == 'job' and 'url' in i_data:
-            print (counter, i_data['title'])
-            new_data = Base(
-                post_id = i_data['id'],
-                by = i_data['by'],
-                score = i_data['score'],
-                time = i_data['time'],
-                title = i_data['title'],
-                post_type = i_data['type'],
-                url = i_data['url'],
-            )
-            new_data.save()
-            counter += 1
-
-
-        elif i_data['type'] == 'poll':
-            # print (counter, i_data['title'])
-            new_data = Base(
-                post_id = i_data['id'],
-                by = i_data['by'],
-                score = i_data['score'],
-                text = i_data['text'],
-                time = i_data['time'],
-                title = i_data['title'],
-                post_type = i_data['type'],
-            )
-            new_data.save()
-            counter += 1
-
-
-            '''
-
+def no_text_url():
+    new_data = Base(
+        post_id = i_data['id'],
+        by = i_data['by'],
+        score = i_data['score'],
+        time = i_data['time'],
+        title = i_data['title'],
+        post_type = i_data['type'],
+    )
+    new_data.save()

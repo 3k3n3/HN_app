@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from .models import Base, Comment
 from django.core.paginator import Paginator
+from django.db.models import Q
 from .filters import BaseFilter
 
 import json
@@ -9,11 +10,11 @@ import requests
 
 from django.utils import timezone
 import datetime
+from django.http import HttpResponse
+
 
 def home(request):
-##################
     '''
-# from HN Api
     url = 'https://hacker-news.firebaseio.com/v0/maxitem.json?print=pretty'
     payload = "{}"
     response = requests.request("GET", url, data=payload)
@@ -21,6 +22,7 @@ def home(request):
     # data is maxitem Id, integer value
     data = response.json()
 
+    global pid, counter, i_data
     pid = []
     counter = 1
 
@@ -57,20 +59,9 @@ def home(request):
 
 
         elif 'Ask HN' in i_data['title'] or 'Tell HN' in i_data['title']:
-            pid.append(i_data['id'])
-            new_data = Base(
-                post_id = i_data['id'],
-                by = i_data['by'],
-                score = i_data['score'],
-                text = i_data['text'],
-                time = i_data['time'],
-                title = i_data['title'],
-                post_type = 'Ask HN',
-            )
-            # new_data.save()
+            update_db()
             print(counter,':',i_url[35:],'Ask HN')
             counter += 1
-
 
             # if 'kids' in i_data:
             #     for data in i_data['kids']:
@@ -79,23 +70,10 @@ def home(request):
             # else: print('Ask HN, no kids')
 
         elif 'Show HN' in i_data['title']:
-            pid.append(i_data['id'])
-            
-            new_data = Base(
-                post_id = i_data['id'],
-                by = i_data['by'],
-                score = i_data['score'],
-                url = i_data['url'],
-                time = i_data['time'],
-                title = i_data['title'],
-                post_type = 'Show HN',
-            )
-            # new_data.save()
+            update_db()
             print(counter,':',i_url[35:],'Show HN')
             counter += 1
 
-            # pid.append(i_data['id'])
-            # print(counter,':',i_url[35:],'Show HN')
             # if 'kids' in i_data:
             #     for i in i_data['kids']:
             #         i_url = "https://hacker-news.firebaseio.com/v0/item/%d.json" %(i)
@@ -105,22 +83,10 @@ def home(request):
             # counter += 1
 
         elif i_data['type'] == 'job':
-            pid.append(i_data['id'])
-
-            new_data = Base(
-                post_id = i_data['id'],
-                by = i_data['by'],
-                score = i_data['score'],
-                text = i_data['text'],
-                time = i_data['time'],
-                title = i_data['title'],
-                post_type = i_data['type'],
-            )
-            # new_data.save()
+            update_db()
             print(counter,':',i_url[35:],'Job')
             counter += 1
 
-            # print(counter,':',i_url[35:],i_data['type'])
             # if 'kids' in i_data:
             #     for i in i_data['kids']:
             #         i_url = "https://hacker-news.firebaseio.com/v0/item/%d.json" %(i)
@@ -130,22 +96,10 @@ def home(request):
             # counter += 1
 
         elif i_data['type'] == 'story':
-            pid.append(i_data['id'])
-
-            new_data = Base(
-                post_id = i_data['id'],
-                by = i_data['by'],
-                score = i_data['score'],
-                url = i_data['url'],
-                time = i_data['time'],
-                title = i_data['title'],
-                post_type = i_data['type'],
-            )
-            # new_data.save()
+            update_db()
             print(counter,':',i_url[35:],'Story')
             counter += 1
 
-            # print(counter,':',i_url[35:],i_data['type'])
             # if 'kids' in i_data:
             #     for i in i_data['kids']:
             #         i_url = "https://hacker-news.firebaseio.com/v0/item/%d.json" %(i)
@@ -159,11 +113,12 @@ def home(request):
             # counter += 1
 
         data -= 1
-        if counter == 11:
+        if counter == 2:
             break
-    print(pid)
+    # print(pid)
     '''
-########################
+
+
     # fiter based on score(top stories have higher score)
     posts = Base.objects.all().order_by("-score")
 
@@ -182,6 +137,73 @@ def home(request):
     }
 
     return render(request, 'app/home.html', context)
+
+def update_db():
+    pid.append(i_data['id'])
+    if 'url' in i_data:
+        xurl()
+    elif 'text' in i_data:
+        xtext()
+    else:
+        none()
+
+
+def xurl():
+    new_data = Base(
+        post_id = i_data['id'],
+        by = i_data['by'],
+        score = i_data['score'],
+        url = i_data['url'],
+        time = i_data['time'],
+        title = i_data['title'],
+        post_type = i_data['type'],
+        # post_type = 'Show HN', # to specify cetain story types for example, 
+    )
+    # new_data.save()
+
+def xtext():
+    new_data = Base(
+        post_id = i_data['id'],
+        by = i_data['by'],
+        score = i_data['score'],
+        text = i_data['text'],
+        time = i_data['time'],
+        title = i_data['title'],
+        post_type = i_data['type'],
+    )
+    # new_data.save()
+
+def none():
+    new_data = Base(
+        post_id = i_data['id'],
+        by = i_data['by'],
+        score = i_data['score'],
+        # text = i_data['text'],
+        time = i_data['time'],
+        title = i_data['title'],
+        post_type = i_data['type'],
+    )
+    # new_data.save()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 def post(request, pk):
     context = {}
@@ -225,7 +247,8 @@ def new_hn(request):
     return render(request, 'app/home.html', context)
 
 def ask_hn(request):
-    posts = Base.objects.filter(post_type='Ask HN').order_by("-time")
+    posts = Base.objects.filter(Q(title__icontains='Ask HN') | Q(title__icontains="Tell HN")).order_by("-time")
+    # posts = Base.objects.filter(post_type='Ask HN').order_by("-time")
     type_filter = BaseFilter(request.GET, queryset=posts)
     posts = type_filter.qs
 
@@ -242,7 +265,8 @@ def ask_hn(request):
     return render(request, 'app/home.html', context)
 
 def show_hn(request):
-    posts = Base.objects.filter(post_type='Show HN').order_by("-time")
+    posts = Base.objects.filter(title__icontains='Show HN').order_by("-time")
+    # posts = Base.objects.filter(post_type='Show HN').order_by("-time")
     type_filter = BaseFilter(request.GET, queryset=posts)
     posts = type_filter.qs
 
@@ -259,7 +283,7 @@ def show_hn(request):
     return render(request, 'app/home.html', context)
 
 def jobs_hn(request):
-    posts = Base.objects.filter(post_type='jobs').order_by("-time")
+    posts = Base.objects.filter(post_type='job').order_by("-time")
     type_filter = BaseFilter(request.GET, queryset=posts)
     posts = type_filter.qs
 
@@ -275,19 +299,3 @@ def jobs_hn(request):
 
     return render(request, 'app/home.html', context)
 
-def polls_hn(request):
-    posts = Base.objects.filter(post_type='polls').order_by("-time")
-    type_filter = BaseFilter(request.GET, queryset=posts)
-    posts = type_filter.qs
-
-    # paginate
-    paginator = Paginator(posts, 30)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-
-    context= {
-        'type_filter': type_filter,
-        'page_obj': page_obj,
-    }
-
-    return render(request, 'app/home.html', context)
